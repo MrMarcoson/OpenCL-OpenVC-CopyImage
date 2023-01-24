@@ -75,7 +75,6 @@ int main() {
     cl::Kernel kernel(program, "copy_image");
 
     cv::Mat input_image = load_image("file.png");
-    cv::Mat input_image = load_image(input_file_name);
     std::vector<uchar> input_arr;
 
     if(input_image.isContinuous()){
