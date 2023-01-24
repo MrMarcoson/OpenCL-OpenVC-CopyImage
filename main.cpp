@@ -75,18 +75,11 @@ int main() {
     cl::Kernel kernel(program, "copy_image");
 
     cv::Mat input_image = load_image("file.png");
-    std::vector<uchar> input_arr(input_image.size().width * input_image.size().height * 4);
-    std::vector<uchar> output_arr(image_size * image_size * 4);
+    cv::Mat input_image = load_image(input_file_name);
+    std::vector<uchar> input_arr;
 
-    int step = 0;
-    for(int i = 0; i < input_image.size().width ; i++) {
-        for(int j = 0; j < input_image.size().height; j++) {
-            input_arr[step] = (int)input_image.at<cv::Vec3b>(i, j)[0];
-            input_arr[step + 1] = (int)input_image.at<cv::Vec3b>(i, j)[1];
-            input_arr[step + 2] = (int)input_image.at<cv::Vec3b>(i, j)[2];
-            input_arr[step + 3] = (int)input_image.at<cv::Vec3b>(i, j)[3];
-            step += 4;
-        }
+    if(input_image.isContinuous()){
+        input_arr.assign(input_image.datastart, input_image.dataend);
     }
 
     cl::ImageFormat format(CL_RGBA, CL_UNORM_INT8);
@@ -102,6 +95,7 @@ int main() {
     kernel.setArg(0, Input_Image);
 	kernel.setArg(1, Output_Image);
 
+    std::vector<uchar> output_arr(image_size * image_size * 4);
     queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(image_size, image_size), cl::NullRange, NULL);
     queue.enqueueReadImage(Output_Image, CL_TRUE, origin, output_region, 0, 0, &output_arr[0]);
 
